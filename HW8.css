@@ -1,0 +1,89 @@
+body { 
+	background-image: url("http://www.wkrb13.com/logos/generic-stocks3.jpg"); 
+	background-repeat: no-repeat;
+	background-size: 100%;
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size: 100%
+}
+#demo{
+	margin-left: auto;
+	margin-right: auto;
+	width: 700px;
+}
+#title{
+	color: white;
+}
+#company{
+	height: 20px;
+	font-size: 110%;
+}
+#search{
+	height:30px;
+	font-size: 110%;
+}
+h1{
+	color: white;
+	font-size: 150%;
+	margin: 100px 0px 0px 250px;
+}
+#top{
+	width: 850px;
+	height: 200px;
+	margin-left: auto;
+	margin-right: auto;
+	//margin-left: 350px;
+	border-bottom: groove 2px white;
+}
+#chart{
+	width: 850px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-left: 350px;
+	//border-bottom: groove white;
+}
+#headline{
+	color: white;
+	font-size: 160%;
+	font-weight: bold;
+	float: left;
+	//margin-left: auto;
+	//margin-right: auto;
+	margin-right: 100px;
+	margin-top: 50px;
+}
+#stockchart{
+	float: right;
+	margin-top: 50px;
+}
+#fb{
+	width: 60px;
+	height: 30px;
+	float: left;
+}
+#info{
+	width: 850px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-left: 350px;
+	margin-top: 20px;
+}
+td.name{
+	width: 300px;
+	text-align: left;
+}
+td.value{
+	width: 100px;
+	text-align: center;
+}
+td.value1{
+	width: 100px;
+	text-align: right;
+}
+div.main{
+	width: 850px;
+	//margin-left: auto;
+	//margin-right: auto;
+}
+a:link{
+	color: black;
+}

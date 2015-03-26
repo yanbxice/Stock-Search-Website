@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	    <meta charset="utf-8">
+		<title>Market Stock Search</title>
+		<link type="text/css" rel="stylesheet" href="HW8.css">
+		
+		<script src="http://yui.yahooapis.com/3.15.0/build/yui/yui-min.js"></script>
+		<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+		<script language=javascript>
+			//function validation(){
+				//if(document.getElementById("company").value==""){
+				//console.log("alert");
+				//alert("Please enter company name/symbol");}
+			//}
+			
+			window.onload = initAll;
+			var xhr = false;
+			function initAll() {
+				document.getElementById("search").onclick = getNewFile;
+			}
+			function getNewFile(cc){
+				var company = document.getElementById("company").value;
+				//var company = cc;
+				var comArr = company.split(",");
+				if(company == "")   alert("Please enter company name/symbol");
+				else makeRequest(comArr[0]);
+				return false;
+			}
+			function makeRequest(company){
+				if (window.XMLHttpRequest) { xhr = new XMLHttpRequest(); }
+				else { 
+					if (window.ActiveXObject) {
+						try { xhr = new ActiveXObject("Microsoft.XMLHTTP"); } 
+						catch (e) { } 
+					}
+				}
+				
+				if (xhr) {
+					var queryString = "http://cs-server.usc.edu:36938/examples/servlet/HelloWorldExample?";
+					queryString = queryString + "company=" + company;
+					xhr.onreadystatechange = handleStateChange;
+					xhr.open("GET", queryString, true);
+					xhr.setRequestHeader("Connection", "Close");
+					xhr.setRequestHeader("Method", "GET" + queryString + "HTTP/1.1");
+					xhr.send(null);
+				} else { alert("Sorry, but I couldn't create an XMLHttpRequest"); }
+			}
+			
+			function handleStateChange(){  
+				var pageDiv = document.getElementById("chart");
+				var infoDiv = document.getElementById("info");
+				if(xhr.readyState==4){  
+					if(xhr.status==200){  
+						//var text=document.createTextNode(xhr.responseText);
+						//pageDiv.appendChild(text);
+						var doc = eval('(' + xhr.responseText + ')');
+						var symbol = doc.result.Symbol;
+						var name = doc.result.Name;
+						var strHTML = "";
+						strHTML += "<div id='top'>";
+						if (name != "Stock Information Not Found!"){
+							var lastPrice = doc.result.quote.LastTradePriceOnly;
+							var change = doc.result.quote.Change;   var percent = doc.result.quote.ChangeInPercent;
+							//alert(lastPrice+change+percent);
+							strHTML += "<div id='headline'>" + name + "(" + symbol + ")" + "</br>";
+							strHTML += "<span style='font-weight:normal;font-size:165%'>" + lastPrice + "</span>";
+							if (doc.result.quote.ChangeType == "+"){
+								strHTML += " <img src='http://www-scf.usc.edu/~csci571/2014Spring/hw6/up_g.gif' style='width:15px;height:20px'><span style='color:green;font-weight:normal'>" + change + "(" + percent + ")";
+								strHTML += "</span>";
+							}
+							if (doc.result.quote.ChangeType == "-"){
+								strHTML += " <img src='http://www-scf.usc.edu/~csci571/2014Spring/hw6/down_r.gif' style='width:15px;height:20px'><span style='color:red;font-weight:normal'>" + change + "(" + percent + ")";
+								strHTML += "</span>";
+							}
+							if (change == 0){
+								strHTML += " <span style='color:green;font-weight:normal'>" + change + "(" + percent + ")";
+								strHTML += "</span>";
+							}
+							var caption = "Stock Information of " + name + " (" + symbol + ")"; var description = "Last Trade Price: " + lastPrice + ", Change: " + doc.result.quote.ChangeType + change + "(" + percent + ")";
+							strHTML += "<div id='fbImg'><input id='fb' type='image' src='../images/facebook.gif' onClick='share(&quot;";
+							strHTML +=  name + "&quot;, &quot;" + symbol + "&quot;, &quot;" + caption + "&quot;, &quot;" + description + "&quot;, &quot;"+ doc.result.StockChartImageURL + "&quot;)'></div></div>";
+							strHTML += "<div id='stockchart'><img src='" + doc.result.StockChartImageURL + "' style='height:130px;width:250px'></div></div>";
+							
+							
+							//get other stock parameters
+							var arr1=new Array("Prev Close:","Day's Range:","Open:","52wk Range:","Bid:","Volumn:","Ask:","Avg Vol (3m):","1y Target Est:","Market Cap:");
+							var quoteHTML = "";
+							infoDiv.innerHTML = quoteHTML;
+							quoteHTML += "<div class='main' style='font-size:110%'><table>";
+							var j = 0;
+							quoteHTML += "<tr><td class='name'>" + arr1[j++] + "</td><td class='value'>" + doc.result.quote.PreviousClose + "</td>";
+							quoteHTML += "<td class='name'>" + arr1[j++] + "</td><td class='value1'>" + doc.result.quote.DaysLow + "-" + doc.result.quote.DaysHigh + "</td></tr>";
+							quoteHTML += "<tr><td class='name'>" + arr1[j++] + "</td><td class='value'>" + doc.result.quote.Open + "</td>";
+							quoteHTML += "<td class='name'>" + arr1[j++] + "</td><td class='value1'>" + doc.result.quote.YearLow + "-" + doc.result.quote.YearHigh + "</td></tr>";
+							quoteHTML += "<tr><td class='name'>" + arr1[j++] + "</td><td class='value'>" + doc.result.quote.Bid + "</td>";
+							quoteHTML += "<td class='name'>" + arr1[j++] + "</td><td class='value1'>" + doc.result.quote.Volumn + "</td></tr>";
+							quoteHTML += "<tr><td class='name'>" + arr1[j++] + "</td><td class='value'>" + doc.result.quote.Ask + "</td>";
+							quoteHTML += "<td class='name'>" + arr1[j++] + "</td><td class='value1'>" + doc.result.quote.AverageDailyVolumn + "</td></tr>";
+							quoteHTML += "<tr><td class='name'>" + arr1[j++] + "</td><td class='value'>" + doc.result.quote.OneYearTargetPrice + "</td>";
+							quoteHTML += "<td class='name'>" + arr1[j++] + "</td><td class='value1'>" + doc.result.quote.MarketCapitalization + "</td></tr>";
+							quoteHTML += "</table></div>";
+							
+							
+							//get all the news
+							var newsHTML = "";
+							newsHTML += "<div class='main' style='color:black'>";
+							if (doc.result.News.Item[0].Title == "Financial Company News is not available"){
+								newsHTML += "Financial Company News is not available</div>";
+							}
+							else{
+								newsHTML += "<ul>";
+								for (var k = 0; k < doc.result.News.Item.length; k++){
+									var title = doc.result.News.Item[k].Title;
+									var link = doc.result.News.Item[k].Link;
+									newsHTML += "<li><a href='" + link + "' target='_blank'>" + title + "</a></li>";
+								}
+								newsHTML += "</ul></div>";
+							}
+							
+							//implement YUI tabView
+							YUI().use('tabview', function(Y) {
+									var tabview = new Y.TabView({
+										children: [{
+											label: 'Quote Information',
+											content: quoteHTML
+										}, {
+											label: 'Head Newslines',
+											content: newsHTML
+										}]
+									});
+
+									tabview.render('#info');
+							});
+								
+							
+			
+			
+						}
+						else {
+							strHTML += "<h1>Stock Information Not Found!</h1></div>";
+							infoDiv.innerHTML = "";
+						}
+						pageDiv.innerHTML = strHTML;
+						
+					}	
+				}	
+			}
+
+			function share(name, symbol, caption, description, chart){
+				window.fbAsyncInit = function() {
+				FB.init({
+					appId      : '727167920667083',
+					status     : true,
+					xfbml      : true
+				});
+				
+				
+				FB.ui({
+					method: 'feed',
+					name: name,
+					caption: caption,
+					description: description,
+					link: ('http://finance.yahoo.com/q?s='+symbol),
+					picture: chart
+				},
+				function(response) {
+					if (response && response.post_id) {
+						alert('Post was published.');
+					} else {
+						alert('Post was not published.');
+					}
+				}
+				);
+	
+		
+				};
+
+
+				(function(d, s, id){
+					var js, fjs = d.getElementsByTagName(s)[0];
+					if (d.getElementById(id)) {return;}
+					js = d.createElement(s); js.id = id;
+					js.src = "//connect.facebook.net/en_US/all.js";
+					fjs.parentNode.insertBefore(js, fjs);
+				}(document, 'script', 'facebook-jssdk'));
+			}
+						
+			
+		</script>
+	</head>
+	
+	<body class="yui3-skin-sam">
+	<div id="fb-root"></div>
+	<div id="demo" class="yui3-skin-sam">
+	<span id="title">Company</span>
+	<input type="text" id="company" name="comSym" value="Enter company symbol" size="60" onfocus="this.value=''">
+	<input type="submit" value="Search" id="search">
+	</div>
+	
+	<script>
+	YUI().use('autocomplete', 'autocomplete-highlighters', function (Y) {
+		Y.one('#company').plug(Y.Plugin.AutoComplete, {
+			resultHighlighter: 'phraseMatch',
+			activateFirstItem: true,
+			source: function (query, callback) {
+				$.ajax({
+					dataType: "jsonp",
+					url: "http://autoc.finance.yahoo.com/autoc?",
+					data: {query : query, callback : callback},
+					jsonpCallback: "YAHOO.Finance.SymbolSuggest.ssCallback"
+				});
+				YAHOO.Finance.SymbolSuggest.ssCallback = function(data){
+					//var str = data.ResultSet.Result.symbol + ", " + data.ResultSet.Result.name + ", " + data.ResultSet.Result.exch;
+					var obj = data.ResultSet;
+					var i = 0;
+					var str = new Array();
+					for (i=0;i<obj.Result.length;i++){
+						var symbol = obj.Result[i].symbol;
+						var name = obj.Result[i].name;
+						var exch = obj.Result[i].exch;
+						str[i]=symbol+", "+name+" ("+exch+")";
+						
+					}
+					callback(str);
+					
+				}
+				//on : {
+        		//select : function(e) {
+                  //getNewFile();
+        		//}
+   			// }	
+				//on:makeRequest();
+			}
+			
+		});
+		//Y.one('#company').ac.render();
+		Y.one('#company').ac.on("select", function(data) {
+			console.log(data.result.raw);
+			document.getElementById("company").value = data.result.raw;
+			getNewFile();
+		});
+	});
+	
+	var YAHOO = {
+        Finance: {
+            SymbolSuggest: {}
+        }
+    };
+	</script>
+
+	<div id="chart"></div>
+	<div id="info"></div>
+	</body>
+</html>
